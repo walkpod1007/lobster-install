@@ -1,0 +1,51 @@
+{
+  "agent": "lobster",
+  "model": "openai/gpt-5",
+  "defaultModel": "openai/gpt-5",
+  "workspace": "~/.openclaw/workspace-lobster",
+
+  "channels": {
+    "line": {
+      "channelAccessToken": "YOUR_LINE_CHANNEL_ACCESS_TOKEN",
+      "channelSecret": "YOUR_LINE_CHANNEL_SECRET",
+      "mode": "reply",
+      "pushQuota": 0
+    }
+  },
+
+  "memory": {
+    "enabled": true,
+    "dir": "~/.openclaw/workspace-lobster/memory",
+    "sessionSummary": true
+  },
+
+  "session": {
+    "maxTokens": 150000,
+    "watchdog": {
+      "enabled": true,
+      "tokenThreshold": 150000,
+      "action": "reset",
+      "silent": true,
+      "cooldownMinutes": 10
+    }
+  },
+
+  "skills": [
+    "~/.openclaw/skills"
+  ],
+
+  "features": {
+    "push": false,
+    "reply": true,
+    "imageGen": false,
+    "tts": false,
+    "stt": false,
+    "googleWorkspace": false,
+    "n8n": false
+  },
+
+  "logging": {
+    "level": "info",
+    "file": "~/.openclaw/gateway.log"
+  }
+}

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦞 龍蝦 AI 助理 — 設定精靈</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #f97316;
+    --accent-dim: #ea580c;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header .emoji {
+    font-size: 64px;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    align-items: center;
+    margin-bottom: 32px;
+    gap: 0;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    border: 2px solid var(--border);
+    color: var(--muted);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .step-dot.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .step-dot.done {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .step-line.done { background: var(--green); }
+
+  .step-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding: 0 6px;
+  }
+
+  .step-label span {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .card .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  /* System checks */
+  .check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+
+  .check-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .check-name {
+    font-weight: 500;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .check-detail {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Form */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .field .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+  }
+
+  .field input::placeholder {
+    color: var(--muted);
+    font-family: -apple-system, sans-serif;
+  }
+
+  .optional-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(100,116,139,0.2);
+    color: var(--muted);
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 400;
+  }
+
+  /* Button */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover { background: var(--accent-dim); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Success state */
+  .success-icon {
+    font-size: 64px;
+    text-align: center;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .success-text {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .command-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .error-msg {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(239,68,68,0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="emoji">🦞</span>
+    <h1>龍蝦 AI 助理</h1>
+    <p>設定精靈 — 只需 3 個步驟</p>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-dot" id="dot3">3</div>
+  </div>
+  <div class="step-label">
+    <span>系統檢查</span>
+    <span>填入設定</span>
+    <span>完成啟動</span>
+  </div>
+
+  <!-- Step 1: 系統檢查 -->
+  <div class="card section active" id="step1">
+    <h2>系統環境檢查</h2>
+    <p class="subtitle">確認你的 Mac 已準備好所需的工具</p>
+
+    <div class="check-list" id="checkList">
+      <div class="check-item">
+        <div class="loading-spinner"></div>
+        <div class="check-name">檢查中...</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn1" onclick="goToStep2()" disabled>
+      下一步 →
+    </button>
+  </div>
+
+  <!-- Step 2: 填入設定 -->
+  <div class="card section" id="step2">
+    <h2>填入金鑰</h2>
+    <p class="subtitle">
+      LINE Token 和 Secret 在
+      <a href="https://developers.line.biz/" target="_blank" style="color:var(--accent)">LINE Developers</a>
+      的 Messaging API Channel 裡取得
+    </p>
+
+    <div class="field">
+      <label>LINE Channel Access Token</label>
+      <input type="password" id="lineToken" placeholder="貼上你的 Channel Access Token">
+    </div>
+
+    <div class="field">
+      <label>LINE Channel Secret</label>
+      <input type="password" id="lineSecret" placeholder="貼上你的 Channel Secret">
+    </div>
+
+    <div class="field">
+      <label>
+        OpenAI API Key
+        <span class="optional-badge">選填</span>
+      </label>
+      <input type="password" id="openaiKey" placeholder="sk-... （訂閱制可留空）">
+      <p class="hint">如果你用 ChatGPT Plus 訂閱制，可以不填。</p>
+    </div>
+
+    <div id="configError"></div>
+
+    <button class="btn btn-primary" id="btn2" onclick="submitConfig()">
+      儲存設定並啟動 →
+    </button>
+  </div>
+
+  <!-- Step 3: 完成 -->
+  <div class="card section" id="step3">
+    <span class="success-icon">✅</span>
+    <p class="success-text">
+      <strong style="color:var(--text)">龍蝦助理已啟動</strong><br><br>
+      打開 LINE，找到你的 Bot，<br>
+      傳一句話給它試試看吧 🦞
+    </p>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">管理指令</div>
+      <div class="command-box">openclaw gateway restart</div>
+      <div class="command-box">openclaw gateway stop</div>
+      <div class="command-box">tail -f ~/.openclaw/gateway.log</div>
+    </div>
+
+    <p style="font-size:12px;color:var(--muted);text-align:center">
+      可以關閉這個視窗了，助理會在背景持續運行。
+    </p>
+  </div>
+</div>
+
+<script>
+let sysCheckPassed = false;
+
+// ─── 系統檢查 ──────────────────────────
+
+async function runSysCheck() {
+  try {
+    const res = await fetch('/api/syscheck');
+    const data = await res.json();
+    renderChecks(data.checks);
+  } catch (e) {
+    document.getElementById('checkList').innerHTML =
+      '<div class="check-item"><div class="check-icon">❌</div><div class="check-name">無法連線到設定精靈</div></div>';
+  }
+}
+
+function renderChecks(checks) {
+  const list = document.getElementById('checkList');
+  list.innerHTML = '';
+
+  let allOk = true;
+  for (const c of checks) {
+    if (!c.ok) allOk = false;
+
+    const item = document.createElement('div');
+    item.className = 'check-item';
+    item.innerHTML = `
+      <div class="check-icon">${c.ok ? '✅' : '⚠️'}</div>
+      <div class="check-name">${c.name}</div>
+      <div class="check-detail">${c.detail}</div>
+    `;
+    list.appendChild(item);
+  }
+
+  // 允許繼續（就算有些工具缺失，因為 install.sh 應該已處理）
+  sysCheckPassed = true;
+  document.getElementById('btn1').disabled = false;
+
+  if (!allOk) {
+    const warn = document.createElement('p');
+    warn.style.cssText = 'font-size:12px;color:var(--yellow);margin-top:12px;line-height:1.6';
+    warn.textContent = '⚠️ 部分工具尚未就緒，但可繼續設定。如果 install.sh 還在執行中，請稍候再重新整理頁面。';
+    list.after(warn);
+  }
+}
+
+function goToStep2() {
+  setStep(2);
+}
+
+// ─── 設定提交 ──────────────────────────
+
+async function submitConfig() {
+  const lineToken = document.getElementById('lineToken').value.trim();
+  const lineSecret = document.getElementById('lineSecret').value.trim();
+  const openaiKey = document.getElementById('openaiKey').value.trim();
+  const errEl = document.getElementById('configError');
+
+  errEl.innerHTML = '';
+
+  if (!lineToken || !lineSecret) {
+    errEl.innerHTML = '<div class="error-msg">LINE Token 和 LINE Secret 為必填欄位</div>';
+    return;
+  }
+
+  const btn = document.getElementById('btn2');
+  btn.disabled = true;
+  btn.textContent = '儲存中...';
+
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lineToken, lineSecret, openaiKey })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.innerHTML = `<div class="error-msg">錯誤：${data.error}</div>`;
+      btn.disabled = false;
+      btn.textContent = '儲存設定並啟動 →';
+      return;
+    }
+
+    // 啟動 gateway
+    btn.textContent = '啟動中...';
+    const startRes = await fetch('/api/start', { method: 'POST' });
+    const startData = await startRes.json();
+
+    if (!startRes.ok) {
+      errEl.innerHTML = `<div class="error-msg">Gateway 啟動失敗：${startData.error}</div>`;
+      btn.disabled = false;
+      btn.textContent = '儲存設定並啟動 →';
+      return;
+    }
+
+    setStep(3);
+  } catch (e) {
+    errEl.innerHTML = `<div class="error-msg">連線錯誤：${e.message}</div>`;
+    btn.disabled = false;
+    btn.textContent = '儲存設定並啟動 →';
+  }
+}
+
+// ─── Step 切換 ────────────────────────
+
+function setStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`step${i}`).classList.toggle('active', i === n);
+    const dot = document.getElementById(`dot${i}`);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done'), dot.textContent = '✓';
+    else if (i === n) dot.classList.add('active'), dot.textContent = i;
+    else dot.textContent = i;
+  }
+  for (let i = 1; i <= 2; i++) {
+    const line = document.getElementById(`line${i}`);
+    line.classList.toggle('done', i < n);
+  }
+}
+
+// Init
+runSysCheck();
+</script>
+</body>
+</html>
