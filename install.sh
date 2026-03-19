@@ -194,19 +194,18 @@ wait $WIZARD_PID 2>/dev/null || true
 
 # ─── OpenAI OAuth 登入 ────────────────────
 
-step "登入 ChatGPT 訂閱帳號"
+step "登入 ChatGPT 帳號"
 echo ""
 echo "  接下來會開啟瀏覽器，請用你的 ChatGPT 帳號登入。"
-echo "  登入完成後回到終端機，按 Enter 繼續。"
+echo "  這是讓龍蝦助理用你的 ChatGPT 訂閱來思考。"
 echo ""
 
-openclaw channels add --channel openai-codex --account default 2>/dev/null || true
-openclaw channels login --channel openai-codex --account default 2>/dev/null || {
-  warn "自動登入失敗，請手動執行：openclaw channels login"
+openclaw onboard --auth-choice openai-codex 2>/dev/null || {
+  warn "自動登入失敗，請手動執行：openclaw onboard"
+  read -rp "  按 Enter 繼續..."
 }
 
-read -rp "  登入完成了嗎？按 Enter 繼續..."
-log "OpenAI 認證完成"
+log "ChatGPT 認證完成"
 
 # ─── Cloudflared Tunnel ───────────────────
 
