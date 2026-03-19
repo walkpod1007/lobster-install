@@ -5,7 +5,7 @@ set -euo pipefail
 # 🦞 龍蝦 AI 助理 — 一鍵安裝腳本
 # ─────────────────────────────────────────
 
-OPENCLAW_VERSION="latest"
+OPENCLAW_VERSION="2026.2.25"
 WIZARD_PORT=3456
 INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OPENCLAW_HOME="$HOME/.openclaw"
