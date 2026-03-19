@@ -105,59 +105,56 @@ openclaw --version
 
 ---
 
-## 步驟四：設定 LINE 金鑰
+## 步驟四：設定精靈填入金鑰
 
-> 確認版本正確後。
+> 設定精靈（瀏覽器頁面）會自動開啟，引導填入 LINE Token 和 Secret。
 
-現在把你剛才準備的兩組金鑰填進去。跑這行：
+畫面上會有兩個欄位，把你準備好的金鑰貼進去：
+- Channel Access Token（那串很長的）
+- Channel Secret（32 碼那個）
 
-openclaw config set line.channelAccessToken "你的TOKEN貼這裡"
+填完按下一步。
 
-再跑這行：
-
-openclaw config set line.channelSecret "你的SECRET貼這裡"
-
-把引號裡面換成你自己的金鑰。兩行都跑完跟我說。
-
-> ⚠️ 引導者注意：如果對方直接把 Token/Secret 貼給你，幫他組好完整指令再貼回去，不要讓他自己拼。
+> ⚠️ 引導者注意：如果對方直接把 Token/Secret 貼給你，不用幫組指令了，wizard 有 UI 直接貼。
 
 ---
 
-## 步驟五：啟動 Webhook 通道
+## 步驟五：登入 ChatGPT 帳號
 
-> 對方說兩行都跑完了。
+> 設定精靈完成後，終端機會提示登入 ChatGPT。
 
-跑這行建立對外通道：
+畫面會說「接下來會開啟瀏覽器，請用你的 ChatGPT 帳號登入」。
 
-cloudflared tunnel --url http://localhost:18789
-
-畫面會跑出一行網址，長得像 https://xxx-xxx-xxx.trycloudflare.com
-
-把那行網址複製起來貼給我。
-
-> ⚠️ 引導者注意：這個 URL 每次重開會變。後續要處理永久方案。
+瀏覽器打開後，用你的 ChatGPT 帳號登入就好。登入完回到終端機按 Enter。
 
 ---
 
-## 步驟六：填入 Webhook URL
+## 步驟六：設定 LINE Webhook
 
-> 對方把 trycloudflare 網址貼過來後。
+> 終端機會自動產生一個網址，顯示在畫面上。
 
-回到 LINE Developers Console，「Messaging API」分頁，Webhook settings：
+畫面會出現一個框框，裡面有一行網址，長得像：
+https://xxx-xxx.trycloudflare.com/line/webhook
 
-1. 在 Webhook URL 填入：{對方給的網址}/line/webhook
-2. 按 Update
-3. 按 Verify，應該會顯示 Success
+把這行網址完整複製，然後：
+1. 打開 https://developers.line.biz/console/
+2. 點進你的 Channel，切到 Messaging API 分頁
+3. 找到 Webhook URL，按 Edit
+4. 貼上剛才那行網址
+5. 按 Update，再按 Verify
+6. 看到 Success 就成功了
 
-顯示 Success 了嗎？
+設定完回到終端機按 Enter。
+
+重要：不要關掉終端機視窗！關掉 LINE 就斷線了。
 
 ---
 
 ## 步驟七：開始聊天
 
-恭喜！打開 LINE，找到你剛建的官方帳號，傳一則訊息試試。
+打開 LINE，找到你剛建的官方帳號，傳一句話試試。
 
-如果有回覆，就代表裝好了。
+有回覆就代表裝好了。恭喜！
 
 ---
 
