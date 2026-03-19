@@ -90,12 +90,25 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 log "ffmpeg ✓"
 
+# ─── pnpm 全域目錄 ────────────────────────
+
+if ! pnpm root -g &>/dev/null 2>&1; then
+  step "設定 pnpm 全域目錄"
+  pnpm setup
+  # 載入剛設定的環境變數
+  if [[ -f "$HOME/.zshrc" ]]; then
+    source "$HOME/.zshrc" 2>/dev/null || true
+  fi
+  export PNPM_HOME="$HOME/Library/pnpm"
+  export PATH="$PNPM_HOME:$PATH"
+fi
+
 # ─── OpenClaw ─────────────────────────────
 
 step "安裝 OpenClaw"
 if command -v openclaw &>/dev/null; then
   CURRENT_VER=$(openclaw --version 2>/dev/null || echo "unknown")
-  warn "OpenClaw 已安裝（${CURRENT_VER}），更新至最新版..."
+  warn "OpenClaw 已安裝（${CURRENT_VER}），鎖定版本 ${OPENCLAW_VERSION}..."
 fi
 pnpm install -g openclaw@${OPENCLAW_VERSION}
 log "OpenClaw $(openclaw --version 2>/dev/null || echo '') 已安裝"

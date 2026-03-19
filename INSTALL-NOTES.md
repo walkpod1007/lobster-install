@@ -48,3 +48,18 @@
 - 補寫新手引導 SOP（純文字，LINE 可讀）
 - install.sh 修正發現的 bug
 - 建 CHANGELOG.md（這是一個 skill 的迭代）
+
+### 6. OPENCLAW_VERSION 寫 latest
+- 原本：latest（會裝到最新版）
+- 修正：鎖定 2026.2.25（SPEC 明確要求）
+- 狀態：✅ 已改
+
+### 7. npm → pnpm
+- 原本：npm install -g openclaw
+- 修正：pnpm install -g openclaw（跟我們家裡環境一致）
+- 狀態：✅ 已改
+
+### 8. unbound variable
+- 原本：CURRENT_VER? 語法錯誤（bash set -u 下報錯）
+- 修正：加大括號 ${CURRENT_VER}
+- 狀態：✅ 已改
