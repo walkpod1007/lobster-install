@@ -90,15 +90,7 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 log "ffmpeg ✓"
 
-# ─── pnpm 全域目錄 ────────────────────────
-
-step "設定 pnpm 全域目錄"
-export PNPM_HOME="$HOME/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-mkdir -p "$PNPM_HOME"
-pnpm config set global-bin-dir "$PNPM_HOME" 2>/dev/null || true
-pnpm setup 2>/dev/null || true
-log "pnpm 全域目錄 ✓"
+# ─── pnpm 全域目錄（跳過，統一用 npm）────
 
 # ─── OpenClaw ─────────────────────────────
 
@@ -120,10 +112,10 @@ if command -v openclaw &>/dev/null; then
       npm uninstall -g openclaw 2>/dev/null || true
     fi
     
-    pnpm install -g openclaw@${OPENCLAW_VERSION}
+    npm install -g openclaw@${OPENCLAW_VERSION}
   fi
 else
-  pnpm install -g openclaw@${OPENCLAW_VERSION}
+  npm install -g openclaw@${OPENCLAW_VERSION}
 fi
 log "OpenClaw $(openclaw --version 2>/dev/null || echo '') 已安裝"
 
