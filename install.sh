@@ -95,9 +95,9 @@ log "ffmpeg ✓"
 step "安裝 OpenClaw"
 if command -v openclaw &>/dev/null; then
   CURRENT_VER=$(openclaw --version 2>/dev/null || echo "unknown")
-  warn "OpenClaw 已安裝（$CURRENT_VER），更新至最新版..."
+  warn "OpenClaw 已安裝（${CURRENT_VER}），更新至最新版..."
 fi
-npm install -g openclaw@$OPENCLAW_VERSION
+pnpm install -g openclaw@${OPENCLAW_VERSION}
 log "OpenClaw $(openclaw --version 2>/dev/null || echo '') 已安裝"
 
 # ─── 建立目錄結構 ─────────────────────────
