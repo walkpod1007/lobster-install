@@ -192,6 +192,76 @@ open "http://localhost:$WIZARD_PORT" 2>/dev/null || true
 echo "  等待設定完成...（完成後請關閉瀏覽器分頁）"
 wait $WIZARD_PID 2>/dev/null || true
 
+# ─── OpenAI OAuth 登入 ────────────────────
+
+step "登入 ChatGPT 訂閱帳號"
+echo ""
+echo "  接下來會開啟瀏覽器，請用你的 ChatGPT 帳號登入。"
+echo "  登入完成後回到終端機，按 Enter 繼續。"
+echo ""
+
+openclaw channels add --channel openai-codex --account default 2>/dev/null || true
+openclaw channels login --channel openai-codex --account default 2>/dev/null || {
+  warn "自動登入失敗，請手動執行：openclaw channels login"
+}
+
+read -rp "  登入完成了嗎？按 Enter 繼續..."
+log "OpenAI 認證完成"
+
+# ─── Cloudflared Tunnel ───────────────────
+
+step "建立 LINE Webhook 通道"
+echo ""
+echo "  正在產生對外網址..."
+echo ""
+
+# 用 quick tunnel 背景跑，擷取 URL
+cloudflared tunnel --url http://localhost:18789 2>&1 &
+CF_PID=$!
+
+# 等待 URL 產生（最多 15 秒）
+TUNNEL_URL=""
+for i in $(seq 1 15); do
+  sleep 1
+  TUNNEL_URL=$(curl -s http://localhost:18789/.well-known/tunnel 2>/dev/null | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' || true)
+  if [[ -z "$TUNNEL_URL" ]]; then
+    # 從 cloudflared 輸出擷取
+    TUNNEL_URL=$(jobs -l 2>/dev/null; cat /tmp/cf-tunnel-$$.log 2>/dev/null | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | head -1 || true)
+  fi
+  [[ -n "$TUNNEL_URL" ]] && break
+done
+
+if [[ -z "$TUNNEL_URL" ]]; then
+  # 備用方案：從 log 檔撈
+  sleep 3
+  TUNNEL_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/openclaw/openclaw-*.log 2>/dev/null | tail -1 || true)
+fi
+
+if [[ -n "$TUNNEL_URL" ]]; then
+  WEBHOOK_URL="${TUNNEL_URL}/line/webhook"
+  log "Webhook 通道建立成功"
+  echo ""
+  echo "  ╔══════════════════════════════════════════════╗"
+  echo "  ║  你的 Webhook URL：                          ║"
+  echo "  ║  $WEBHOOK_URL"
+  echo "  ╚══════════════════════════════════════════════╝"
+  echo ""
+  echo "  請完成以下步驟："
+  echo "  1. 打開 https://developers.line.biz/console/"
+  echo "  2. 點進你的 Channel → Messaging API"
+  echo "  3. 在 Webhook URL 按 Edit，貼上上面的網址"
+  echo "  4. 按 Update，再按 Verify，看到 Success 就成功了"
+  echo ""
+  echo "  ⚠️ 重要：不要關閉這個終端機視窗！關掉會斷線。"
+  echo ""
+else
+  warn "無法自動產生 Webhook URL"
+  echo "  請手動執行：cloudflared tunnel --url http://localhost:18789"
+  echo "  然後把產生的網址後面加 /line/webhook 填到 LINE Webhook 設定"
+fi
+
+read -rp "  Webhook 設定完成了嗎？按 Enter 繼續..."
+
 # ─── 設定 launchd 常駐 ────────────────────
 
 PLIST_PATH="$HOME/Library/LaunchAgents/work.life-os.openclaw.plist"

@@ -69,3 +69,70 @@
 - 問題：如果對方之前用 npm 裝的 openclaw（在 /opt/homebrew/lib/node_modules/），pnpm 會報 ERR_PNPM_NO_GLOBAL_BIN_DIR
 - 修正方向：先偵測 openclaw 裝在哪，用同一個 package manager 升級；或先 npm uninstall -g 再 pnpm install -g
 - 狀態：⏳ 待修
+
+### 10. npm 才是正解
+- pnpm 全域目錄在新手機器上反覆失敗
+- 結論：放棄 pnpm，統一用 npm install -g（Node.js 自帶，零設定）
+- 狀態：✅ 已改
+
+### 11. 設定精靈成功啟動
+- install.sh 跑完後自動開啟 localhost:3456
+- 系統環境檢查全過（macOS 26.2, Node v25.6.1, cloudflared, ffmpeg, OpenClaw 2026.2.25）
+- wizard UI 正常顯示三步驟：系統檢查 → 填入設定 → 完成啟動
+- 狀態：✅ 通過
+
+### 12. 設定精靈全程通過
+- 三步驟（系統檢查→填入設定→完成啟動）全部順利
+- Gateway 成功啟動
+- 狀態：✅ 通過
+
+### 13. Webhook 設定是最大斷點
+- 新手不知道怎麼打開 LINE Developers Console
+- 「打開 Messaging API 分頁」這句話對新手來說太難
+- 需要：直接給 URL（https://developers.line.biz/console/）
+- 更好的做法：wizard 第二步就引導填 webhook，或自動用 cloudflared quick tunnel 產生 URL 並顯示在完成頁面讓使用者複製貼上
+- 狀態：⏳ 下次迭代處理
+
+### 14. 整體評估
+- install.sh 從下載到啟動大約 5-10 分鐘（環境已有的情況下更快）
+- 卡點集中在：pnpm 全域目錄（已修）、webhook 設定（待改善）
+- wizard UI 品質不錯，新手友善
+- 下一版重點：webhook 自動化 + GUIDE.md 補 LINE Developers 操作截圖
+
+### 15. LINE Developers Console 直連
+- 格式：https://developers.line.biz/console/channel/{CHANNEL_ID}/messaging-api
+- CHANNEL_ID 每個人不同，wizard 如果能從 Token 反查就能自動產生直連
+- 退而求其次：引導語給 https://developers.line.biz/console/ 讓使用者自己點進去
+- 狀態：⏳ 待處理
+
+### 16. 辦公室那台的 webhook 現況
+- Webhook URL：https://bot2.life-os.work/line/webhook
+- 這是之前設的自有域名，cloudflared tunnel "claw" 有在跑但 DNS 可能沒指對
+- 新手場景應該用 cloudflared quick tunnel 自動產生 URL
+- 狀態：⏳ 下次迭代
+
+### 17. Webhook 引導完整流程（待寫進 GUIDE）
+- install.sh 跑完後，wizard 完成頁應該要：
+  1. 自動啟動 cloudflared quick tunnel（背景跑）
+  2. 顯示產生的 trycloudflare.com URL
+  3. 告訴使用者：複製這個網址，後面加 /line/webhook
+  4. 貼到 LINE Developers Console 的 Webhook URL
+  5. 按 Verify 確認 Success
+  6. 警告：不要關閉終端機，關掉就斷線了
+- 或者 install.sh 結束前自動跑 cloudflared tunnel --url http://localhost:18789 &
+  把 URL 印在終端機上
+
+### 18. 終端機不能關
+- cloudflared quick tunnel 跑在前景，關掉終端機就斷
+- 新手一定會關掉
+- 長期解法：用 launchd 把 cloudflared 變成背景服務
+- install.sh 應該自動處理這件事
+- 狀態：⏳ 下次迭代
+
+### 19. GPT 訂閱制需要 OAuth 登入
+- 原本 SPEC 寫「ChatGPT 訂閱制（吃訂閱額度）」以為不用填 key
+- 實際：OpenClaw 要用 OpenAI 模型，訂閱制也需要走 OAuth 認證流程
+- 類似 Gemini CLI 的 Google OAuth 登入
+- wizard 第二步或 install.sh 要加一步：引導使用者跑 OpenAI OAuth 登入
+- 需要確認：openclaw 有沒有內建 openai auth 指令？還是要另外處理？
+- 狀態：⏳ 待確認流程
