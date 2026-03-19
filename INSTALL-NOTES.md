@@ -63,3 +63,9 @@
 - 原本：CURRENT_VER? 語法錯誤（bash set -u 下報錯）
 - 修正：加大括號 ${CURRENT_VER}
 - 狀態：✅ 已改
+
+### 9. pnpm vs npm 安裝衝突
+- 原本：install.sh 統一用 pnpm install -g
+- 問題：如果對方之前用 npm 裝的 openclaw（在 /opt/homebrew/lib/node_modules/），pnpm 會報 ERR_PNPM_NO_GLOBAL_BIN_DIR
+- 修正方向：先偵測 openclaw 裝在哪，用同一個 package manager 升級；或先 npm uninstall -g 再 pnpm install -g
+- 狀態：⏳ 待修

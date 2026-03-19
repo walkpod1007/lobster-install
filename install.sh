@@ -95,7 +95,6 @@ log "ffmpeg ✓"
 if ! pnpm root -g &>/dev/null 2>&1; then
   step "設定 pnpm 全域目錄"
   pnpm setup
-  # 載入剛設定的環境變數
   if [[ -f "$HOME/.zshrc" ]]; then
     source "$HOME/.zshrc" 2>/dev/null || true
   fi
@@ -105,12 +104,29 @@ fi
 
 # ─── OpenClaw ─────────────────────────────
 
-step "安裝 OpenClaw"
+step "安裝 OpenClaw ${OPENCLAW_VERSION}"
+
+# 偵測舊版安裝方式，先清除再統一用 pnpm
 if command -v openclaw &>/dev/null; then
   CURRENT_VER=$(openclaw --version 2>/dev/null || echo "unknown")
-  warn "OpenClaw 已安裝（${CURRENT_VER}），鎖定版本 ${OPENCLAW_VERSION}..."
+  OPENCLAW_PATH=$(which openclaw 2>/dev/null || echo "")
+  
+  if [[ "${CURRENT_VER}" == "${OPENCLAW_VERSION}" ]]; then
+    log "OpenClaw ${OPENCLAW_VERSION} 已是正確版本，跳過"
+  else
+    warn "發現舊版 OpenClaw（${CURRENT_VER}），升級至 ${OPENCLAW_VERSION}..."
+    
+    # 如果是 npm 全域安裝（路徑含 /opt/homebrew 或 /usr/local）
+    if [[ "$OPENCLAW_PATH" == */opt/homebrew/* ]] || [[ "$OPENCLAW_PATH" == */usr/local/* ]]; then
+      warn "舊版透過 npm 安裝，先移除..."
+      npm uninstall -g openclaw 2>/dev/null || true
+    fi
+    
+    pnpm install -g openclaw@${OPENCLAW_VERSION}
+  fi
+else
+  pnpm install -g openclaw@${OPENCLAW_VERSION}
 fi
-pnpm install -g openclaw@${OPENCLAW_VERSION}
 log "OpenClaw $(openclaw --version 2>/dev/null || echo '') 已安裝"
 
 # ─── 建立目錄結構 ─────────────────────────
