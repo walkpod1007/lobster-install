@@ -92,15 +92,13 @@ log "ffmpeg ✓"
 
 # ─── pnpm 全域目錄 ────────────────────────
 
-if ! pnpm root -g &>/dev/null 2>&1; then
-  step "設定 pnpm 全域目錄"
-  pnpm setup
-  if [[ -f "$HOME/.zshrc" ]]; then
-    source "$HOME/.zshrc" 2>/dev/null || true
-  fi
-  export PNPM_HOME="$HOME/Library/pnpm"
-  export PATH="$PNPM_HOME:$PATH"
-fi
+step "設定 pnpm 全域目錄"
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+mkdir -p "$PNPM_HOME"
+pnpm config set global-bin-dir "$PNPM_HOME" 2>/dev/null || true
+pnpm setup 2>/dev/null || true
+log "pnpm 全域目錄 ✓"
 
 # ─── OpenClaw ─────────────────────────────
 
